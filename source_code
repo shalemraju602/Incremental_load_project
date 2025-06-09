@@ -1,0 +1,52 @@
+CREATE TABLE dbo.Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerID NVARCHAR(50),
+    OrderDate DATETIME,
+    UpdatedDate DATETIME,
+    Amount FLOAT
+);
+
+
+
+
+CREATE TABLE dbo.temp_Orders (
+    OrderID INT ,
+    CustomerID NVARCHAR(50),
+    OrderDate DATETIME,
+    UpdatedDate DATETIME,
+    Amount FLOAT
+);
+
+
+select * from  dbo.temp_Orders
+
+
+
+CREATE PROCEDURE sp_upsert_orders
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    MERGE dbo.Orders AS Target
+    USING dbo.temp_Orders AS Source
+    ON Target.OrderID = Source.OrderID
+    WHEN MATCHED AND Source.UpdatedDate > Target.UpdatedDate THEN
+        UPDATE SET
+            Target.CustomerID = Source.CustomerID,
+            Target.OrderDate = Source.OrderDate,
+            Target.UpdatedDate = Source.UpdatedDate,
+            Target.Amount = Source.Amount
+    WHEN NOT MATCHED BY TARGET THEN
+        INSERT (OrderID, CustomerID, OrderDate, UpdatedDate, Amount)
+        VALUES (Source.OrderID, Source.CustomerID, Source.OrderDate, Source.UpdatedDate, Source.Amount);
+END
+
+
+
+
+select * from dbo.temp_orders
+select * from dbo.Orders
+
+
+10:12:14 - project setup 
+14:37:01 sql table creation
